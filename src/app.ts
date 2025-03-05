@@ -3,7 +3,7 @@ import { loadFixtures } from "./fixtures";
 import { logRequest, logResponse } from "./lib/log";
 import { userRouter } from "./router/user-router";
 import { createDatabaseConnection } from "./database";
-import jwt from 'jsonwebtoken';
+import jwt from "jsonwebtoken";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -14,6 +14,33 @@ app.use(express.json());
 app.use(logRequest);
 //log responses headers
 app.use(logResponse);
+
+const protectedRoutes = ["/protected", "/users"];
+
+app.use((req, res, next) => {
+  const isProtectedRoute = protectedRoutes.some((route) =>
+    req.url.startsWith(route)
+  );
+
+  if (!isProtectedRoute) {
+    return next();
+  }
+
+  const accessToken = req.headers.authorization?.replace("Bearer ", "");
+
+  if (!accessToken) {
+    throw new Error("Access Token not provided");
+  }
+
+  try {
+    const payload = jwt.verify(accessToken, "secret");
+    console.log(payload);
+  } catch (e) {
+    res.status(401).json({message: 'Invalid Access Token'})
+  }
+
+  next();
+});
 
 // Tratamento de erros para pre-middlewares
 app.use(
@@ -34,11 +61,14 @@ app.post("/login", async (req, res) => {
   const { email, password } = req.body;
   const { userRepository } = await createDatabaseConnection();
   const user = await userRepository.findOne({ where: { email } });
-  if(!user || !user.comparePassword(password)){
-    throw new Error('Invalid Credentials')
+  if (!user || !user.comparePassword(password)) {
+    throw new Error("Invalid Credentials");
   }
-  const accessToken = jwt.sign({ name: user.name, email: user.email }, 'secret');
-  res.json({ accessToken })
+  const accessToken = jwt.sign(
+    { name: user.name, email: user.email },
+    "secret"
+  );
+  res.json({ access_token: accessToken });
 });
 
 // Rotas da API
