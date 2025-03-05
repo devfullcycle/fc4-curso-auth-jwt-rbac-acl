@@ -1,0 +1,32 @@
+@baseUrl = http://localhost:3000
+
+### Create new user
+# @name createUserAction
+POST {{baseUrl}}/users
+Content-Type: application/json
+
+{
+    "name": "John Doe",
+    "email": "john@example.com",
+    "password": "123456"
+}
+
+###
+@userId = {{ createUserAction.response.body.id }}
+
+### Get user by ID
+GET {{baseUrl}}/users/{{userId}}
+
+
+### Update user
+PATCH {{baseUrl}}/users/{{userId}}
+Content-Type: application/json
+
+{
+    "name": "John Doe Updated",
+    "email": "john.updated@example.com",
+    "password": "654321"
+}
+
+### Delete user
+DELETE {{baseUrl}}/users/{{userId}}
