@@ -2,6 +2,8 @@ import express, { NextFunction } from "express";
 import { loadFixtures } from "./fixtures";
 import { logRequest, logResponse } from "./lib/log";
 import { userRouter } from "./router/user-router";
+import { createDatabaseConnection } from "./database";
+import jwt from 'jsonwebtoken';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -12,7 +14,6 @@ app.use(express.json());
 app.use(logRequest);
 //log responses headers
 app.use(logResponse);
-
 
 // Tratamento de erros para pre-middlewares
 app.use(
@@ -29,6 +30,16 @@ app.use(
   }
 );
 
+app.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+  const { userRepository } = await createDatabaseConnection();
+  const user = await userRepository.findOne({ where: { email } });
+  if(!user || !user.comparePassword(password)){
+    throw new Error('Invalid Credentials')
+  }
+  const accessToken = jwt.sign({ name: user.name, email: user.email }, 'secret');
+  res.json({ accessToken })
+});
 
 // Rotas da API
 app.use("", userRouter);
@@ -47,10 +58,10 @@ function errorHandler(
   res: express.Response,
   next: NextFunction
 ) {
-  if(!error){
+  if (!error) {
     return;
   }
-  
+
   //some errors
 
   const errorDetails = {
@@ -59,12 +70,19 @@ function errorHandler(
     stack: error.stack,
     cause: error.cause,
   };
-  console.error("Error details:", JSON.stringify(errorDetails, (key, value) => {
-    // Se for a stack trace, formata com quebras de linha adequadas
-    if (key === 'stack' && typeof value === 'string') {
-      return value.split('\n').map(line => line.trim());
-    }
-    return value;
-  }, 2));
+  console.error(
+    "Error details:",
+    JSON.stringify(
+      errorDetails,
+      (key, value) => {
+        // Se for a stack trace, formata com quebras de linha adequadas
+        if (key === "stack" && typeof value === "string") {
+          return value.split("\n").map((line) => line.trim());
+        }
+        return value;
+      },
+      2
+    )
+  );
   res.status(500).send({ message: "Internal server error" });
 }
