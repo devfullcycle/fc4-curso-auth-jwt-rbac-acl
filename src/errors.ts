@@ -12,6 +12,13 @@ export class InvalidAccessTokenError extends Error {
   }
 }
 
+export class InvalidRefreshTokenError extends Error {
+  constructor(params?: { message?: string; options?: ErrorOptions }) {
+    super(params?.message ?? "Invalid refresh token", params?.options);
+    this.name = "InvalidRefreshTokenError";
+  }
+}
+
 export class InvalidCredentialsError extends Error {
   constructor(params?: { message?: string; options?: ErrorOptions }) {
     super(params?.message ?? "Invalid credentials", params?.options);

@@ -6,3 +6,19 @@ Content-Type: application/json
     "email": "admin@user.com",
     "password": "admin"
 }
+
+###
+POST http://localhost:3000/refresh-token
+Content-Type: application/json
+
+{
+    "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiQWRtaW4gVXNlciIsImVtYWlsIjoiYWRtaW5AdXNlci5jb20iLCJpYXQiOjE3NDEyMzI4MjAsImV4cCI6MTc0MTI2ODgyMH0.xodA71seHtJ11PscR2IDra_5Bv3SJ-P-IUmPv36_0_8"
+}
+
+
+//vida - risco
+//5m
+//4.30m
+//5m
+
+//

@@ -72,12 +72,29 @@ app.post("/login", async (req, res, next) => {
   const { email, password } = req.body;
   try {
     const authService = await createAuthenticationService();
-    const accessToken = await authService.login(email, password);
-    res.json({ access_token: accessToken });
+    const tokens = await authService.login(email, password);
+    res.json(tokens);
   } catch (e) {
     next(e);
   }
 });
+
+app.post('/refresh-token', async (req, res, next) => {
+  const refreshToken = req.body?.refresh_token || req.headers.authorization?.replace("Bearer ", "");
+
+  if(!refreshToken){
+    next(new TokenNotProvidedError());
+    return;
+  }
+
+  try {
+    const authService = await createAuthenticationService();
+    const tokens = await authService.doRefreshToken(refreshToken);
+    res.json(tokens);
+  } catch (e) {
+    next(e);
+  }
+})
 
 // Rotas da API
 app.use("", userRouter);

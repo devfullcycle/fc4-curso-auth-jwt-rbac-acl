@@ -1,18 +1,26 @@
 import { Repository } from "typeorm";
 import { User } from "../entities/User";
 import jwt from "jsonwebtoken";
-import { InvalidCredentialsError } from "../errors";
+import { InvalidCredentialsError, InvalidRefreshTokenError } from "../errors";
 import { createDatabaseConnection } from "../database";
 
 export class AuthenticationService {
   constructor(private userRepository: Repository<User>) {}
 
-  async login(email: string, password: string): Promise<string> {
+  async login(
+    email: string,
+    password: string
+  ): Promise<{ access_token: string; refresh_token: string }> {
     const user = await this.userRepository.findOne({ where: { email } });
     if (!user || !user.comparePassword(password)) {
       throw new InvalidCredentialsError();
     }
-    return AuthenticationService.generateAccessToken(user);
+    const accessToken = AuthenticationService.generateAccessToken(user);
+    const refreshToken = AuthenticationService.generateRefreshToken(user);
+    return {
+      access_token: accessToken,
+      refresh_token: refreshToken,
+    };
   }
 
   static generateAccessToken(user: User): string {
@@ -20,22 +28,61 @@ export class AuthenticationService {
       { name: user.name, email: user.email },
       process.env.JWT_SECRET as string,
       {
-        expiresIn: process.env.JWT_EXPIRES_IN as any,
+        expiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRES_IN as any,
       }
     );
   }
 
   static verifyAccessToken(token: string): {
-    sub: string;
     name: string;
     email: string;
   } {
     return jwt.verify(token, process.env.JWT_SECRET as string) as {
-      sub: string;
       name: string;
       email: string;
       iat: number;
     };
+  }
+
+  static generateRefreshToken(user: User): string {
+    return jwt.sign(
+      { name: user.name, email: user.email },
+      process.env.JWT_SECRET as string,
+      {
+        expiresIn: process.env.JWT_REFRESH_TOKEN_EXPIRES_IN as any,
+      }
+    );
+  }
+
+  static verifyRefreshToken(token: string): {
+    name: string;
+    email: string;
+  } {
+    return jwt.verify(token, process.env.JWT_SECRET as string) as {
+      name: string;
+      email: string;
+      iat: number;
+    };
+  }
+
+  async doRefreshToken(refreshToken: string) {
+    try {
+      const payload = AuthenticationService.verifyRefreshToken(refreshToken);
+      const user = await this.userRepository.findOne({
+        where: { email: payload.email },
+      });
+      // if(!user){
+      //   //NotFound
+      // }
+      const newAccessToken = AuthenticationService.generateAccessToken(user!);
+      const newRefreshToken = AuthenticationService.generateRefreshToken(user!);
+      return {
+        access_token: newAccessToken,
+        refresh_token: newRefreshToken,
+      };
+    } catch (e) {
+      throw new InvalidRefreshTokenError({ options: { cause: e } });
+    }
   }
 }
 
