@@ -10,10 +10,13 @@ import dotenv from "dotenv";
 import {
   InvalidAccessTokenError,
   InvalidCredentialsError,
+  NotFoundError,
   TokenExpiredError,
   TokenNotProvidedError,
 } from "./errors";
 import jwt from "jsonwebtoken";
+import e from "express";
+import { createUserService } from "./services/UserService";
 
 dotenv.config();
 
@@ -29,7 +32,7 @@ app.use(logResponse);
 
 const protectedRoutes = ["/protected", "/users"];
 
-app.use((req, res, next) => {
+app.use(async (req, res, next) => {
   const isProtectedRoute = protectedRoutes.some((route) =>
     req.url.startsWith(route)
   );
@@ -47,7 +50,9 @@ app.use((req, res, next) => {
 
   try {
     const payload = AuthenticationService.verifyAccessToken(accessToken);
-    console.log(payload);
+    const userService = await createUserService();
+    const user = await userService.findById(+payload.sub);
+    req.user = user!; 
     next();
   } catch (e) {
     if (e instanceof jwt.TokenExpiredError) {
@@ -103,6 +108,10 @@ app.post("/refresh-token", async (req, res, next) => {
     }
     next(e);
   }
+});
+
+app.get("/protected", (req, res) => {
+  res.status(200).json(req.user)
 });
 
 // Rotas da API
@@ -164,8 +173,13 @@ function errorHandler(
     return;
   }
 
-  if(error instanceof TokenExpiredError){
-    res.status(401).json({message: 'Token expired'})
+  if (error instanceof TokenExpiredError) {
+    res.status(401).json({ message: "Token expired" });
+    return;
+  }
+
+  if (error instanceof NotFoundError) {
+    res.status(404).json({ message: error.message });
     return;
   }
 

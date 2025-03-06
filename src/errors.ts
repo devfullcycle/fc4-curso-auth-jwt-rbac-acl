@@ -32,3 +32,10 @@ export class TokenExpiredError extends Error {
     this.name = "TokenExpiredError";
   }
 }
+
+export class NotFoundError extends Error {
+  constructor(params?: { message?: string; options?: ErrorOptions }) {
+    super(params?.message ?? "Not found", params?.options);
+    this.name = "NotFoundError";
+  }
+}

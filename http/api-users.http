@@ -1,5 +1,5 @@
 @baseUrl = http://localhost:3000
-@adminAccessToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiQWRtaW4gVXNlciIsImVtYWlsIjoiYWRtaW5AdXNlci5jb20iLCJpYXQiOjE3NDEyMzMzMTAsImV4cCI6MTc0MTIzMzM3MH0.zO1ihPK2e5DBcE9_vzR65ugJK3gf2aQOvyZuAzRlCMI
+@adminAccessToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiQWRtaW4gVXNlciIsImVtYWlsIjoiYWRtaW5AdXNlci5jb20iLCJpYXQiOjE3NDEyMzQyMzksImV4cCI6MTc0MTIzNDI5OSwic3ViIjoiMSJ9.pkz2oKNSXJ-dMgd7A7tIuxVLSXQ34CGKiJCkpOJsv6k
 
 ### Create new user
 # @name createUserAction
