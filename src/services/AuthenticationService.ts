@@ -30,10 +30,11 @@ export class AuthenticationService {
   static generateAccessToken(user: User): string {
     return jwt.sign(
       { name: user.name, email: user.email },
-      process.env.JWT_SECRET as string,
+      process.env.JWT_PRIVATE_KEY as string,
       {
         expiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRES_IN as any,
         subject: user.id + "",
+        algorithm: 'RS256'
       }
     );
   }
@@ -45,8 +46,8 @@ export class AuthenticationService {
     iat: number;
     exp: number;
   } {
-    return jwt.verify(token, process.env.JWT_SECRET as string, {
-      algorithms: ["HS256"],
+    return jwt.verify(token, process.env.JWT_PUBLIC_KEY as string, {
+      algorithms: ["RS256"],
     }) as {
       sub: string;
       name: string;
@@ -59,10 +60,11 @@ export class AuthenticationService {
   static generateRefreshToken(user: User): string {
     return jwt.sign(
       { name: user.name, email: user.email },
-      process.env.JWT_SECRET as string,
+      process.env.JWT_PRIVATE_KEY as string,
       {
         expiresIn: process.env.JWT_REFRESH_TOKEN_EXPIRES_IN as any,
         subject: user.id + "",
+        algorithm: 'RS256'
       }
     );
   }
@@ -74,8 +76,8 @@ export class AuthenticationService {
     iat: number;
     exp: number;
   } {
-    return jwt.verify(token, process.env.JWT_SECRET as string, {
-      algorithms: ["HS256"],
+    return jwt.verify(token, process.env.JWT_PUBLIC_KEY as string, {
+      algorithms: ["RS256"],
     }) as {
       sub: string;
       name: string;
