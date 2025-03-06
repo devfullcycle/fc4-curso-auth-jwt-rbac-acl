@@ -2,8 +2,18 @@ import express, { NextFunction } from "express";
 import { loadFixtures } from "./fixtures";
 import { logRequest, logResponse } from "./lib/log";
 import { userRouter } from "./router/user-router";
-import { createDatabaseConnection } from "./database";
-import jwt from "jsonwebtoken";
+import {
+  AuthenticationService,
+  createAuthenticationService,
+} from "./services/AuthenticationService";
+import dotenv from "dotenv";
+import {
+  InvalidAccessTokenError,
+  InvalidCredentialsError,
+  TokenNotProvidedError,
+} from "./errors";
+
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -29,17 +39,18 @@ app.use((req, res, next) => {
   const accessToken = req.headers.authorization?.replace("Bearer ", "");
 
   if (!accessToken) {
-    throw new Error("Access Token not provided");
+    next(new TokenNotProvidedError());
+    return;
   }
 
   try {
-    const payload = jwt.verify(accessToken, "secret");
+    const payload = AuthenticationService.verifyAccessToken(accessToken);
     console.log(payload);
+    next();
   } catch (e) {
-    res.status(401).json({message: 'Invalid Access Token'})
+    next(new InvalidAccessTokenError({ options: { cause: e } }));
+    return;
   }
-
-  next();
 });
 
 // Tratamento de erros para pre-middlewares
@@ -57,18 +68,15 @@ app.use(
   }
 );
 
-app.post("/login", async (req, res) => {
+app.post("/login", async (req, res, next) => {
   const { email, password } = req.body;
-  const { userRepository } = await createDatabaseConnection();
-  const user = await userRepository.findOne({ where: { email } });
-  if (!user || !user.comparePassword(password)) {
-    throw new Error("Invalid Credentials");
+  try {
+    const authService = await createAuthenticationService();
+    const accessToken = await authService.login(email, password);
+    res.json({ access_token: accessToken });
+  } catch (e) {
+    next(e);
   }
-  const accessToken = jwt.sign(
-    { name: user.name, email: user.email },
-    "secret"
-  );
-  res.json({ access_token: accessToken });
 });
 
 // Rotas da API
@@ -92,14 +100,13 @@ function errorHandler(
     return;
   }
 
-  //some errors
-
   const errorDetails = {
     name: error.name,
     message: error.message,
     stack: error.stack,
     cause: error.cause,
   };
+
   console.error(
     "Error details:",
     JSON.stringify(
@@ -114,5 +121,22 @@ function errorHandler(
       2
     )
   );
+
+  //some errors
+  if (error instanceof TokenNotProvidedError) {
+    res.status(401).send({ message: "Token not provided" });
+    return;
+  }
+
+  if (error instanceof InvalidAccessTokenError) {
+    res.status(401).send({ message: "Invalid access token" });
+    return;
+  }
+
+  if (error instanceof InvalidCredentialsError) {
+    res.status(401).send({ message: "Invalid credentials" });
+    return;
+  }
+
   res.status(500).send({ message: "Internal server error" });
 }
