@@ -17,6 +17,7 @@ import {
 import jwt from "jsonwebtoken";
 import e from "express";
 import { createUserService } from "./services/UserService";
+import { createCartService } from "./services/CartService";
 
 dotenv.config();
 
@@ -60,6 +61,19 @@ app.use(async (req, res, next) => {
     }
     return next(new InvalidAccessTokenError({ options: { cause: e } }));
   }
+});
+
+// Middleware para o carrinho do usuário
+app.use(async (req, res, next) => {
+  if (!req.user) {
+    return next();
+  }
+  const cartService = await createCartService();
+  const cartToken = await cartService.generateCartToken(req.user.id);
+  if (cartToken) {
+    res.setHeader("X-Cart", cartToken);
+  }
+  next();
 });
 
 // Tratamento de erros para pre-middlewares

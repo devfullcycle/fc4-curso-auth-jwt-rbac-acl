@@ -18,7 +18,7 @@ Content-Type: application/json
 
 ###
 GET http://localhost:3000/protected
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiQWRtaW4gVXNlciIsImVtYWlsIjoiYWRtaW5AdXNlci5jb20iLCJpYXQiOjE3NDEyMzQ5MjMsImV4cCI6MTc0MTI3MDkyMywic3ViIjoiMSJ9.XMi8Lg9H4nj32ZygIZpVwcmYEd5TQ4BR3Nxr4iwOrHM
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiQWRtaW4gVXNlciIsImVtYWlsIjoiYWRtaW5AdXNlci5jb20iLCJpYXQiOjE3NDEyMzYxOTMsImV4cCI6MTc0MTIzNjI1Mywic3ViIjoiMSJ9.TAh6ctRUNzJmt90psVz0ATuc3LPtnOT1gybaoDEI-VY
 //vida - risco
 //5m
 //4.30m
