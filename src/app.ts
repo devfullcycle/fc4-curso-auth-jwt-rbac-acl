@@ -10,8 +10,10 @@ import dotenv from "dotenv";
 import {
   InvalidAccessTokenError,
   InvalidCredentialsError,
+  TokenExpiredError,
   TokenNotProvidedError,
 } from "./errors";
+import jwt from "jsonwebtoken";
 
 dotenv.config();
 
@@ -48,8 +50,10 @@ app.use((req, res, next) => {
     console.log(payload);
     next();
   } catch (e) {
-    next(new InvalidAccessTokenError({ options: { cause: e } }));
-    return;
+    if (e instanceof jwt.TokenExpiredError) {
+      return next(new TokenExpiredError({ options: { cause: e } }));
+    }
+    return next(new InvalidAccessTokenError({ options: { cause: e } }));
   }
 });
 
@@ -79,10 +83,12 @@ app.post("/login", async (req, res, next) => {
   }
 });
 
-app.post('/refresh-token', async (req, res, next) => {
-  const refreshToken = req.body?.refresh_token || req.headers.authorization?.replace("Bearer ", "");
+app.post("/refresh-token", async (req, res, next) => {
+  const refreshToken =
+    req.body?.refresh_token ||
+    req.headers.authorization?.replace("Bearer ", "");
 
-  if(!refreshToken){
+  if (!refreshToken) {
     next(new TokenNotProvidedError());
     return;
   }
@@ -92,9 +98,12 @@ app.post('/refresh-token', async (req, res, next) => {
     const tokens = await authService.doRefreshToken(refreshToken);
     res.json(tokens);
   } catch (e) {
+    if (e instanceof jwt.TokenExpiredError) {
+      return next(new TokenExpiredError({ options: { cause: e } }));
+    }
     next(e);
   }
-})
+});
 
 // Rotas da API
 app.use("", userRouter);
@@ -152,6 +161,11 @@ function errorHandler(
 
   if (error instanceof InvalidCredentialsError) {
     res.status(401).send({ message: "Invalid credentials" });
+    return;
+  }
+
+  if(error instanceof TokenExpiredError){
+    res.status(401).json({message: 'Token expired'})
     return;
   }
 
