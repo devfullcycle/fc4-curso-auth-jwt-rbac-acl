@@ -6,12 +6,15 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/app.js",
-    "dev": "nodemon src/auth-server/app.ts"
+    "dev": "nodemon src/auth-server/app.ts",
+    "dev-session-cookie": "nodemon src/clients-backend/app-session-cookie.ts",
+    "test": "node --require ts-node/register --test src/**/*.test.ts"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
     "dotenv": "^16.4.7",
     "express": "^4.21.1",
+    "express-session": "^1.18.1",
     "jsonwebtoken": "^9.0.2",
     "sqlite3": "^5.1.7",
     "typeorm": "^0.3.20"
@@ -19,6 +22,7 @@
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
     "@types/express": "^4.17.21",
+    "@types/express-session": "^1.18.1",
     "@types/jsonwebtoken": "^9.0.7",
     "@types/node": "^22.13.8",
     "nodemon": "^3.1.7",
