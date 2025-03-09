@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/app.js",
-    "dev": "nodemon src/app.ts"
+    "dev": "nodemon src/auth-server/app.ts"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",

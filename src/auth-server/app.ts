@@ -1,6 +1,6 @@
 import express, { NextFunction } from "express";
 import { loadFixtures } from "./fixtures";
-import { logRequest, logResponse } from "./lib/log";
+import { logRequest, logResponse } from "../lib/log";
 import { userRouter } from "./router/user-router";
 import {
   AuthenticationService,
@@ -15,7 +15,6 @@ import {
   TokenNotProvidedError,
 } from "./errors";
 import jwt from "jsonwebtoken";
-import e from "express";
 import { createUserService } from "./services/UserService";
 import { createCartService } from "./services/CartService";
 
