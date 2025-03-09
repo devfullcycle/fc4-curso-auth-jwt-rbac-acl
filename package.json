@@ -8,6 +8,7 @@
     "start": "node dist/app.js",
     "dev": "nodemon src/auth-server/app.ts",
     "dev-session-cookie": "nodemon src/clients-backend/app-session-cookie.ts",
+    "dev-session-stateless": "nodemon src/clients-backend/app-session-stateless.ts",
     "test": "node --require ts-node/register --test src/**/*.test.ts"
   },
   "dependencies": {
@@ -15,6 +16,7 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.1",
     "express-session": "^1.18.1",
+    "iron-session": "^8.0.4",
     "jsonwebtoken": "^9.0.2",
     "sqlite3": "^5.1.7",
     "typeorm": "^0.3.20"
