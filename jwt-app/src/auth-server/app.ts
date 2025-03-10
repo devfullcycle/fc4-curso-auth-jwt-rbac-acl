@@ -17,6 +17,7 @@ import {
 import jwt from "jsonwebtoken";
 import { createUserService } from "./services/UserService";
 import { createCartService } from "./services/CartService";
+import cors from 'cors';
 
 dotenv.config();
 
@@ -24,7 +25,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
-
+app.use(cors());
 //log requests
 app.use(logRequest);
 //log responses headers

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ClientTokenBasedHttp } from '@/ClientTokenBasedHttp'
 import router from '@/router'
 
 async function handleSubmit(event: Event) {
@@ -6,7 +7,11 @@ async function handleSubmit(event: Event) {
   const formData = new FormData(event.target as HTMLFormElement)
   const email = formData.get('email') as string
   const password = formData.get('password') as string
-
+  const http = new ClientTokenBasedHttp({baseURL: 'http://localhost:3000'})
+  const tokens = await http.login(email, password);
+  console.log(tokens);
+  window.localStorage.setItem('accessToken', tokens.access_token);
+  window.localStorage.setItem('refreshToken', tokens.refresh_token);
   
   router.push('/protected')
   
