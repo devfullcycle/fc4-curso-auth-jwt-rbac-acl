@@ -4,7 +4,6 @@ import { logRequest, logResponse } from "../lib/log";
 import { userRouter } from "./router/user-router";
 import {
   AuthenticationService,
-  createAuthenticationService,
 } from "./services/AuthenticationService";
 import dotenv from "dotenv";
 import {
@@ -18,6 +17,7 @@ import jwt from "jsonwebtoken";
 import { createUserService } from "./services/UserService";
 import { createCartService } from "./services/CartService";
 import cors from 'cors';
+import { authRouter } from "./router/auth-router";
 
 dotenv.config();
 
@@ -91,44 +91,14 @@ app.use(
   }
 );
 
-app.post("/login", async (req, res, next) => {
-  const { email, password } = req.body;
-  try {
-    const authService = await createAuthenticationService();
-    const tokens = await authService.login(email, password);
-    res.json(tokens);
-  } catch (e) {
-    next(e);
-  }
-});
 
-app.post("/refresh-token", async (req, res, next) => {
-  const refreshToken =
-    req.body?.refresh_token ||
-    req.headers.authorization?.replace("Bearer ", "");
-
-  if (!refreshToken) {
-    next(new TokenNotProvidedError());
-    return;
-  }
-
-  try {
-    const authService = await createAuthenticationService();
-    const tokens = await authService.doRefreshToken(refreshToken);
-    res.json(tokens);
-  } catch (e) {
-    if (e instanceof jwt.TokenExpiredError) {
-      return next(new TokenExpiredError({ options: { cause: e } }));
-    }
-    next(e);
-  }
-});
 
 app.get("/protected", (req, res) => {
   res.status(200).json(req.user)
 });
 
 // Rotas da API
+app.use("", authRouter);
 app.use("", userRouter);
 
 //Tratamento de erros global da rotas da API
