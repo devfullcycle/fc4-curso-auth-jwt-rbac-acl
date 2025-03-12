@@ -24,7 +24,7 @@ async function handleSubmit(event: Event) {
   // window.localStorage.setItem('accessToken', tokens.access_token);
   // window.localStorage.setItem('refreshToken', tokens.refresh_token);
   
-  //router.push('/protected')
+  router.push('/protected')
   
 }
 </script>

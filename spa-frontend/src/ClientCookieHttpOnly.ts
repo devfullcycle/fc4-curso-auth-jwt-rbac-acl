@@ -87,7 +87,7 @@ export type TokenResponse = {
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'same-origin',
+        credentials: 'include',
       })
   
       if (!response.ok) {
