@@ -21,7 +21,8 @@ authRouter.post("/login", async (req, res, next) => {
 authRouter.post("/refresh-token", async (req, res, next) => {
   const refreshToken =
     req.body?.refresh_token ||
-    req.headers.authorization?.replace("Bearer ", "");
+    req.headers.authorization?.replace("Bearer ", "") || 
+    req.cookies?.refreshToken;
 
   if (!refreshToken) {
     next(new TokenNotProvidedError());
@@ -31,6 +32,8 @@ authRouter.post("/refresh-token", async (req, res, next) => {
   try {
     const authService = await createAuthenticationService();
     const tokens = await authService.doRefreshToken(refreshToken);
+    generateAccessTokenCookie(res, tokens.access_token);
+    generateRefreshTokenCookie(res, tokens.refresh_token);
     res.json(tokens);
   } catch (e) {
     if (e instanceof jwt.TokenExpiredError) {

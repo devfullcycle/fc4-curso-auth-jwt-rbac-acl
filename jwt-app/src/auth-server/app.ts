@@ -2,9 +2,7 @@ import express, { NextFunction } from "express";
 import { loadFixtures } from "./fixtures";
 import { logRequest, logResponse } from "../lib/log";
 import { userRouter } from "./router/user-router";
-import {
-  AuthenticationService,
-} from "./services/AuthenticationService";
+import { AuthenticationService } from "./services/AuthenticationService";
 import dotenv from "dotenv";
 import {
   InvalidAccessTokenError,
@@ -16,8 +14,9 @@ import {
 import jwt from "jsonwebtoken";
 import { createUserService } from "./services/UserService";
 import { createCartService } from "./services/CartService";
-import cors from 'cors';
+import cors from "cors";
 import { authRouter } from "./router/auth-router";
+import cookieParser from "cookie-parser";
 
 dotenv.config();
 
@@ -25,6 +24,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
+app.use(cookieParser());
 app.use(cors());
 //log requests
 app.use(logRequest);
@@ -42,7 +42,9 @@ app.use(async (req, res, next) => {
     return next();
   }
 
-  const accessToken = req.headers.authorization?.replace("Bearer ", "");
+  const accessToken =
+    req.headers.authorization?.replace("Bearer ", "") ||
+    req.cookies?.accessToken;
 
   if (!accessToken) {
     next(new TokenNotProvidedError());
@@ -53,7 +55,7 @@ app.use(async (req, res, next) => {
     const payload = AuthenticationService.verifyAccessToken(accessToken);
     const userService = await createUserService();
     const user = await userService.findById(+payload.sub);
-    req.user = user!; 
+    req.user = user!;
     next();
   } catch (e) {
     if (e instanceof jwt.TokenExpiredError) {
@@ -91,10 +93,8 @@ app.use(
   }
 );
 
-
-
 app.get("/protected", (req, res) => {
-  res.status(200).json(req.user)
+  res.status(200).json(req.user);
 });
 
 // Rotas da API
