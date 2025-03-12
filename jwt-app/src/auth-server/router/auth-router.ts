@@ -46,7 +46,8 @@ authRouter.post("/refresh-token", async (req, res, next) => {
 export function generateAccessTokenCookie(res: Response, accessToken: string){
   res.cookie('accessToken', accessToken, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    //secure: process.env.NODE_ENV === 'production',
+    secure: true,
     sameSite: 'none',
     maxAge: 60000,
     path: '/'
@@ -56,7 +57,8 @@ export function generateAccessTokenCookie(res: Response, accessToken: string){
 export function generateRefreshTokenCookie(res: Response, refreshToken: string){
   res.cookie('refreshToken', refreshToken, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    //secure: process.env.NODE_ENV === 'production',
+    secure: true,
     sameSite: 'none',
     maxAge: 604800000, // 7 days
     path: '/refresh-token'
