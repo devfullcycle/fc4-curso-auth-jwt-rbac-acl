@@ -1,10 +1,21 @@
 <script lang="ts" setup>
 import router from '@/router'
+import { ClientCookieHttpOnly } from '@/ClientCookieHttpOnly'
 
-localStorage.removeItem('accessToken')
-localStorage.removeItem('refreshToken')
+const http = new ClientCookieHttpOnly({
+  baseURL: 'http://localhost:3000'
+});
 
-router.push('/login')
+http.logout().then(() => {
+  localStorage.removeItem('accessTokenExpiryTime')
+  localStorage.removeItem('refreshTokenExpiryTime')
+  router.push('/login')
+})
+
+// ### local storage ###
+// localStorage.removeItem('accessToken')
+// localStorage.removeItem('refreshToken')
+// router.push('/login')
 </script>
 
 <template>

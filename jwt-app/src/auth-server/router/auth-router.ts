@@ -43,6 +43,12 @@ authRouter.post("/refresh-token", async (req, res, next) => {
   }
 });
 
+authRouter.post('/logout', (req, res) => {
+  res.clearCookie('accessToken');
+  res.clearCookie('refreshToken');
+  res.status(204).end();
+})
+
 export function generateAccessTokenCookie(res: Response, accessToken: string){
   res.cookie('accessToken', accessToken, {
     httpOnly: true,
