@@ -46,6 +46,22 @@ Origin: http://localhost:3000
 @teacher2AccessToken = {{ teacher2_jwt_action.response.body.access_token }}
 @teacher2RefreshToken = {{ teacher2_jwt_action.response.body.refresh_token }}
 
+### 👉👉👉 STUDENT1 LOGIN 👈👈👈
+# @name student1_jwt_action
+POST http://localhost:3000/login
+Content-Type: application/json
+Origin: http://localhost:3000
+
+{
+  "email": "student1@user.com",
+  "password": "student1"
+}
+
+###
+
+@student1AccessToken = {{ student1_jwt_action.response.body.access_token }}
+@student1RefreshToken = {{ student1_jwt_action.response.body.refresh_token }}
+
 
 ### Protected Route
 GET http://localhost:3000/protected
@@ -64,7 +80,7 @@ Content-Type: application/json
 ###
 POST http://localhost:3000/courses
 Content-Type: application/json
-Authorization: Bearer {{adminAccessToken}}
+Authorization: Bearer {{teacher1AccessToken}}
 
 {
   "name": "NodeJS",

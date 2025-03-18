@@ -1,5 +1,5 @@
 import type * as express from "express";
-import type { User } from "../../entities/User";
+import type { User } from "../../auth-server/entities/User";
 import type { IronSession } from "iron-session";
 
 declare global {

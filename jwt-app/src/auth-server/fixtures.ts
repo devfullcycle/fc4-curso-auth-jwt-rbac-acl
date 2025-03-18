@@ -3,6 +3,7 @@ import { Cart } from "./entities/Cart";
 import { CartProduct } from "./entities/CartProduct";
 import { Product } from "./entities/Product";
 import { Roles } from "./entities/User";
+import { createStudentService } from "./services/StudentService";
 import { createTeacherService } from "./services/TeacherService";
 import { createUserService } from "./services/UserService";
 
@@ -37,6 +38,17 @@ export async function loadFixtures() {
     },
     department: "Mathematics",
     registration: "654321",
+  });
+  
+  const studentService = await createStudentService();
+  
+  await studentService.create({
+    user: {
+      name: "Student User1",
+      email: "student1@user.com",
+      password: "student1",
+    },
+    registration: "789012",
   });
 
   const product = new Product();

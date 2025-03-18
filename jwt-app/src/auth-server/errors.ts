@@ -39,3 +39,10 @@ export class NotFoundError extends Error {
     this.name = "NotFoundError";
   }
 }
+
+export class UnauthorizedError extends Error {
+  constructor(params?: { message?: string; options?: ErrorOptions }) {
+    super(params?.message ?? "Unauthorized", params?.options);
+    this.name = "UnauthorizedError";
+  }
+}

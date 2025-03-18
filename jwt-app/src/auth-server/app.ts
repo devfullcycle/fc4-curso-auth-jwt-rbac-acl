@@ -10,6 +10,7 @@ import {
   NotFoundError,
   TokenExpiredError,
   TokenNotProvidedError,
+  UnauthorizedError,
 } from "./errors";
 import jwt from "jsonwebtoken";
 import { createUserService } from "./services/UserService";
@@ -34,7 +35,7 @@ app.use(logRequest);
 //log responses headers
 app.use(logResponse);
 
-const protectedRoutes = ["/protected", "/users"];
+const protectedRoutes = ["/protected", "/users", '/teachers', '/students', '/courses'];
 
 app.use(async (req, res, next) => {
   const isProtectedRoute = protectedRoutes.some((route) =>
@@ -170,6 +171,11 @@ function errorHandler(
 
   if (error instanceof NotFoundError) {
     res.status(404).json({ message: error.message });
+    return;
+  }
+
+  if (error instanceof UnauthorizedError) {
+    res.status(403).json({ message: error.message });
     return;
   }
 
