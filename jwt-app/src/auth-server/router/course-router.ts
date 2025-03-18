@@ -2,6 +2,7 @@ import { Router } from "express";
 import { createCourseService } from "../services/CourseService";
 import { Roles } from "../entities/User";
 import { UnauthorizedError } from "../errors";
+import { rolesMiddleware } from "./authorization-patterns";
 
 const courseRouter = Router();
 
@@ -32,28 +33,35 @@ courseRouter.get("/courses/:id", async (req, res, next) => {
 });
 
 // POST /courses - Cria um novo curso
-courseRouter.post("/courses", async (req, res, next) => {
+courseRouter.post(
+  "/courses",
+  rolesMiddleware([Roles.Admin, Roles.Teacher]),
+  async (req, res, next) => {
+    // if (
+    //   !req.user.roles.includes(Roles.Admin) &&
+    //   !req.user.roles.includes(Roles.Teacher)
+    // ) {
+    //   return next(new UnauthorizedError());
+    // }
 
-  if(!req.user.roles.includes(Roles.Admin) && !req.user.roles.includes(Roles.Teacher)){
-    return next(new UnauthorizedError());
+    try {
+      const courseService = await createCourseService();
+      const { name, code, description, credits, semester, teacherId } =
+        req.body;
+      const course = await courseService.create({
+        name,
+        code,
+        description,
+        credits,
+        semester,
+        teacherId,
+      });
+      return res.status(201).json(course);
+    } catch (error) {
+      next(error);
+    }
   }
-
-  try {
-    const courseService = await createCourseService();
-    const { name, code, description, credits, semester, teacherId } = req.body;
-    const course = await courseService.create({
-      name,
-      code,
-      description,
-      credits,
-      semester,
-      teacherId,
-    });
-    return res.status(201).json(course);
-  } catch (error) {
-    next(error);
-  }
-});
+);
 
 // PUT /courses/:id - Atualiza um curso existente
 courseRouter.patch("/courses/:id", async (req, res, next) => {

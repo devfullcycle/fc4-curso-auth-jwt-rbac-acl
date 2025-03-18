@@ -80,7 +80,7 @@ Content-Type: application/json
 ###
 POST http://localhost:3000/courses
 Content-Type: application/json
-Authorization: Bearer {{teacher1AccessToken}}
+Authorization: Bearer {{student1AccessToken}}
 
 {
   "name": "NodeJS",
