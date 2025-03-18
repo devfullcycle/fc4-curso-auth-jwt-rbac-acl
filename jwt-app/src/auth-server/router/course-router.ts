@@ -2,7 +2,7 @@ import { Router } from "express";
 import { createCourseService } from "../services/CourseService";
 import { Roles } from "../entities/User";
 import { UnauthorizedError } from "../errors";
-import { rolesMiddleware } from "./authorization-patterns";
+import { permissionDecorator, permissionMiddleware, rolesMiddleware } from "./authorization-patterns";
 
 const courseRouter = Router();
 
@@ -35,7 +35,7 @@ courseRouter.get("/courses/:id", async (req, res, next) => {
 // POST /courses - Cria um novo curso
 courseRouter.post(
   "/courses",
-  rolesMiddleware([Roles.Admin, Roles.Teacher]),
+  permissionMiddleware('createCourse'),
   async (req, res, next) => {
     // if (
     //   !req.user.roles.includes(Roles.Admin) &&
