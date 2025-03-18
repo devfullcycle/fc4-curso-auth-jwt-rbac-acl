@@ -1,0 +1,56 @@
+import {
+  AbilityBuilder,
+  CreateAbility,
+  createMongoAbility,
+  ForcedSubject,
+  MongoAbility,
+} from "@casl/ability";
+import { Roles, User } from "./entities/User";
+
+const actions = ["manage", "create", "update", "delete", "get"] as const;
+const resources = ["User", "Course", "all"] as const;
+
+type AppAbilities = [
+  (typeof actions)[number],
+  (
+    | (typeof resources)[number]
+    | ForcedSubject<Exclude<(typeof resources)[number], "all">>
+  )
+];
+
+export type AppAbility = MongoAbility<AppAbilities>;
+
+type DefinePermissions = (
+  user: User,
+  builder: AbilityBuilder<AppAbility>
+) => void;
+
+const rolePermissions: Record<Roles, DefinePermissions> = {
+  Admin(user, { can }) {
+    can("manage", "all"); // admin can manage everything
+  },
+  Teacher(user, { can }) {
+    can("get", "Course");
+    can("update", "Course");
+  },
+  Student(user, { can }) {
+    can("get", "Course");
+  },
+};
+
+function defineAbilityFor(user: User): AppAbility {
+  const builder = new AbilityBuilder(
+    createMongoAbility as CreateAbility<AppAbility>
+  );
+
+  user.roles.forEach((role) => {
+    const permissions = rolePermissions[role];
+    if (typeof permissions === "function") {
+      permissions(user, builder);
+    } else {
+      throw new Error(`Invalid permissions for role: ${role}`);
+    }
+  });
+
+  return builder.build();
+}
