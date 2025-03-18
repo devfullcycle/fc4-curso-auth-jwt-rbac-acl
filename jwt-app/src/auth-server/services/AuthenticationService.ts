@@ -29,7 +29,7 @@ export class AuthenticationService {
 
   static generateAccessToken(user: User): string {
     return jwt.sign(
-      { name: user.name, email: user.email },
+      { name: user.name, email: user.email, roles: user.roles },
       process.env.JWT_PRIVATE_KEY as string,
       {
         expiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRES_IN as any,
@@ -43,6 +43,7 @@ export class AuthenticationService {
     sub: string;
     name: string;
     email: string;
+    roles: string[];
     iat: number;
     exp: number;
   } {
@@ -52,6 +53,7 @@ export class AuthenticationService {
       sub: string;
       name: string;
       email: string;
+      roles: string[];
       iat: number;
       exp: number;
     };
@@ -59,7 +61,7 @@ export class AuthenticationService {
 
   static generateRefreshToken(user: User): string {
     return jwt.sign(
-      { name: user.name, email: user.email },
+      { name: user.name, email: user.email, roles: user.roles },
       process.env.JWT_PRIVATE_KEY as string,
       {
         expiresIn: process.env.JWT_REFRESH_TOKEN_EXPIRES_IN as any,
@@ -73,6 +75,7 @@ export class AuthenticationService {
     sub: string;
     name: string;
     email: string;
+    roles: string[];
     iat: number;
     exp: number;
   } {
@@ -82,6 +85,7 @@ export class AuthenticationService {
       sub: string;
       name: string;
       email: string;
+      roles: string[];
       iat: number;
       exp: number;
     };

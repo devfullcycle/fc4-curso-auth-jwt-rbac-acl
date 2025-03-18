@@ -1,0 +1,90 @@
+### 👉👉👉 ADMIN LOGIN 👈👈👈
+# @name admin_jwt_action
+POST http://localhost:3000/login
+Content-Type: application/json
+Origin: http://localhost:3000
+
+{
+  "email": "admin@user.com",
+  "password": "admin"
+}
+
+###
+
+@adminAccessToken = {{ admin_jwt_action.response.body.access_token }}
+@adminRefreshToken = {{ admin_jwt_action.response.body.refresh_token }}
+
+### 👉👉👉 TEACHER1 LOGIN 👈👈👈
+# @name teacher1_jwt_action
+POST http://localhost:3000/login
+Content-Type: application/json
+Origin: http://localhost:3000
+
+{
+  "email": "teacher1@user.com",
+  "password": "teacher1"
+}
+
+###
+
+@teacher1AccessToken = {{ teacher1_jwt_action.response.body.access_token }}
+@teacher1RefreshToken = {{ teacher1_jwt_action.response.body.refresh_token }}
+
+### 👉👉👉 TEACHER2 LOGIN 👈👈👈
+# @name teacher2_jwt_action
+POST http://localhost:3000/login
+Content-Type: application/json
+Origin: http://localhost:3000
+
+{
+  "email": "teacher2@user.com",
+  "password": "teacher2"
+}
+
+###
+
+@teacher2AccessToken = {{ teacher2_jwt_action.response.body.access_token }}
+@teacher2RefreshToken = {{ teacher2_jwt_action.response.body.refresh_token }}
+
+
+### Protected Route
+GET http://localhost:3000/protected
+Authorization: Bearer {{ adminAccessToken }}
+
+###
+# @name admin_refresh_token_action
+POST http://localhost:3000/refresh-token
+Content-Type: application/json
+
+{
+  "refresh_token": "{{ adminRefreshToken }}"
+}
+
+# CREATE COURSE
+###
+POST http://localhost:3000/courses
+Content-Type: application/json
+Authorization: Bearer {{adminAccessToken}}
+
+{
+  "name": "NodeJS",
+  "code": "nodejs",
+  "description": "NodeJS course",
+  "credits": 5,
+  "semester": 1,
+  "teacher_id": 1
+}
+
+###
+GET http://localhost:3000/courses/1
+Authorization: Bearer {{teacher1AccessToken}}
+
+###
+PATCH http://localhost:3000/courses/1
+Content-Type: application/json
+Authorization: Bearer {{teacher1AccessToken}}
+
+{
+  "name": "NodeJS",
+  "description": "Updated NodeJS course description"
+}

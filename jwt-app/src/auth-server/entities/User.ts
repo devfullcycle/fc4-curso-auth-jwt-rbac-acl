@@ -7,6 +7,12 @@ import {
 } from "typeorm";
 import bcrypt from "bcrypt";
 
+export enum Roles {
+  Admin = "Admin",
+  Teacher = "Teacher",
+  Student = "Student"
+}
+
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
@@ -20,6 +26,9 @@ export class User {
 
   @Column()
   password: string;
+
+  @Column("simple-array")
+  roles: Roles[];
 
   @BeforeInsert()
   @BeforeUpdate()

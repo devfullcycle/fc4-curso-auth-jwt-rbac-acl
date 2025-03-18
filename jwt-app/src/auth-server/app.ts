@@ -17,6 +17,9 @@ import { createCartService } from "./services/CartService";
 import cors from "cors";
 import { authRouter } from "./router/auth-router";
 import cookieParser from "cookie-parser";
+import { courseRouter } from "./router/course-router";
+import { teacherRouter } from "./router/teacher-router";
+import { studentRouter } from "./router/student-router";
 
 dotenv.config();
 
@@ -100,6 +103,9 @@ app.get("/protected", (req, res) => {
 // Rotas da API
 app.use("", authRouter);
 app.use("", userRouter);
+app.use("", courseRouter);
+app.use("", teacherRouter);
+app.use("", studentRouter);
 
 //Tratamento de erros global da rotas da API
 app.use(errorHandler);

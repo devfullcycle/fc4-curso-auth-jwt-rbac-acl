@@ -2,6 +2,8 @@ import { createDatabaseConnection } from "./database";
 import { Cart } from "./entities/Cart";
 import { CartProduct } from "./entities/CartProduct";
 import { Product } from "./entities/Product";
+import { Roles } from "./entities/User";
+import { createTeacherService } from "./services/TeacherService";
 import { createUserService } from "./services/UserService";
 
 export async function loadFixtures() {
@@ -13,6 +15,28 @@ export async function loadFixtures() {
     name: "Admin User",
     email: "admin@user.com",
     password: "admin",
+    roles: [Roles.Admin]
+  });
+
+  const teacherService = await createTeacherService();
+
+  await teacherService.create({
+    user: {
+      name: "Teacher User1",
+      email: "teacher1@user.com",
+      password: "teacher1",
+    },
+    department: "Computer Science",
+    registration: "123456",
+  });
+  await teacherService.create({
+    user: {
+      name: "Teacher User2",
+      email: "teacher2@user.com",
+      password: "teacher2",
+    },
+    department: "Mathematics",
+    registration: "654321",
   });
 
   const product = new Product();

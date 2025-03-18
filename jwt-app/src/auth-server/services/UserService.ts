@@ -1,5 +1,5 @@
 import { Repository } from "typeorm";
-import { User } from "../entities/User";
+import { Roles, User } from "../entities/User";
 import { createDatabaseConnection } from "../database";
 
 export class UserService {
@@ -21,6 +21,7 @@ export class UserService {
     name: string;
     email: string;
     password: string;
+    roles: Roles[];
   }): Promise<User> {
     const user = this.userRepository.create(data);
     return this.userRepository.save(user);
@@ -32,6 +33,7 @@ export class UserService {
       name?: string;
       email?: string;
       password?: string;
+      roles?: Roles[];
     }
   ): Promise<User | null> {
     const user = await this.findById(id);
@@ -40,6 +42,7 @@ export class UserService {
     if (data.name) user.name = data.name;
     if (data.email) user.email = data.email;
     if (data.password) user.password = data.password;
+    if (data.roles) user.roles = data.roles;
 
     return this.userRepository.save(user);
   }

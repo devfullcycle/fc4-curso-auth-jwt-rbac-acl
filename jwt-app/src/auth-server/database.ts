@@ -3,6 +3,10 @@ import { User } from "./entities/User";
 import { Cart } from "./entities/Cart";
 import { CartProduct } from "./entities/CartProduct";
 import { Product } from "./entities/Product";
+import { Teacher } from "./entities/Teacher";
+import { Student } from "./entities/Student";
+import { Course } from "./entities/Course";
+import { StudentCourse } from "./entities/StudentCourse";
 
 export let dataSource: DataSource | null = null;
 
@@ -11,7 +15,16 @@ export async function createDatabaseConnection() {
     dataSource = new DataSource({
       type: "sqlite",
       database: ":memory:",
-      entities: [User, Cart, CartProduct, Product],
+      entities: [
+        User,
+        Product,
+        Cart,
+        CartProduct,
+        Teacher,
+        Student,
+        Course,
+        StudentCourse,
+      ],
       synchronize: true,
     });
     await dataSource.initialize();
@@ -22,6 +35,10 @@ export async function createDatabaseConnection() {
     cartRepository: dataSource.getRepository(Cart),
     productRepository: dataSource.getRepository(Product),
     cartProductRepository: dataSource.getRepository(CartProduct),
+    teacherRepository: dataSource.getRepository(Teacher),
+    studentRepository: dataSource.getRepository(Student),
+    courseRepository: dataSource.getRepository(Course),
+    studentCourseRepository: dataSource.getRepository(StudentCourse),
   };
 }
 
