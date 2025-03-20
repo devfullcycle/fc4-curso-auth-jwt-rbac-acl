@@ -1,8 +1,6 @@
 import { Router } from "express";
 import { createCourseService } from "../services/CourseService";
-import { Roles } from "../entities/User";
-import { UnauthorizedError } from "../errors";
-import { permissionDecorator, permissionMiddleware, rolesMiddleware } from "./authorization-patterns";
+import { permissionMiddleware } from "./authorization-patterns";
 
 const courseRouter = Router();
 
@@ -35,15 +33,8 @@ courseRouter.get("/courses/:id", async (req, res, next) => {
 // POST /courses - Cria um novo curso
 courseRouter.post(
   "/courses",
-  permissionMiddleware('createCourse'),
+  permissionMiddleware('create', 'Course'),
   async (req, res, next) => {
-    // if (
-    //   !req.user.roles.includes(Roles.Admin) &&
-    //   !req.user.roles.includes(Roles.Teacher)
-    // ) {
-    //   return next(new UnauthorizedError());
-    // }
-
     try {
       const courseService = await createCourseService();
       const { name, code, description, credits, semester, teacherId } =

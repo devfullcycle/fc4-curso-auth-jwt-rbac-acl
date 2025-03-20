@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { Roles } from "../entities/User";
 import { UnauthorizedError } from "../errors";
+import { defineAbilityFor } from "../permissions";
 
 export function rolesMiddleware(roles: Roles[]) {
   return function (req: Request, res: Response, next: NextFunction) {
@@ -99,19 +100,13 @@ export function permissionDecorator(permission: string) {
   };
 }
 
-export function permissionMiddleware(permission: string) {
+export function permissionMiddleware(action: string, resource: string) {
   return function (req: Request, res: Response, next: NextFunction) {
-    const roles = req.user.roles;
-
-    if(roles.includes(Roles.Admin)){
-      return next();
-    }
-
-    const permissions = roles.map((role) => permissionMap[role]).flat();
-    const hasPermission = permissions.includes(permission);
-    if (!hasPermission) {
+    const ability = defineAbilityFor(req.user);
+    if(!ability.can(action as any, resource as any)){
       return next(new UnauthorizedError());
     }
+    
     next();
   };
 }

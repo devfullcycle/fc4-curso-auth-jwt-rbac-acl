@@ -38,7 +38,7 @@ const rolePermissions: Record<Roles, DefinePermissions> = {
   },
 };
 
-function defineAbilityFor(user: User): AppAbility {
+export function defineAbilityFor(user: User): AppAbility {
   const builder = new AbilityBuilder(
     createMongoAbility as CreateAbility<AppAbility>
   );
