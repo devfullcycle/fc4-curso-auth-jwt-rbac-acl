@@ -80,7 +80,7 @@ Content-Type: application/json
 ###
 POST http://localhost:3000/courses
 Content-Type: application/json
-Authorization: Bearer {{teacher1AccessToken}}
+Authorization: Bearer {{adminAccessToken}}
 
 {
   "name": "NodeJS",
@@ -93,7 +93,7 @@ Authorization: Bearer {{teacher1AccessToken}}
 
 ###
 GET http://localhost:3000/courses/1
-Authorization: Bearer {{teacher1AccessToken}}
+Authorization: Bearer {{teacher2AccessToken}}
 
 ###
 PATCH http://localhost:3000/courses/1

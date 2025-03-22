@@ -2,12 +2,14 @@ import { Repository } from "typeorm";
 import { Course } from "../entities/Course";
 import { Teacher } from "../entities/Teacher";
 import { createDatabaseConnection } from "../database";
-import { NotFoundError } from "../errors";
+import { NotFoundError, UnauthorizedError } from "../errors";
 import { Ability } from "@casl/ability";
+import { AppAbility } from "../permissions";
+import { CourseRepository } from "../entities/CourseRepository";
 
 export class CourseService {
   constructor(
-    private courseRepository: Repository<Course>,
+    private courseRepository: CourseRepository,
     private teacherRepository: Repository<Teacher>
   ) {}
 
@@ -44,10 +46,25 @@ export class CourseService {
     });
   }
 
-  async findById(id: number): Promise<Course | null> {
-    return this.courseRepository.findOne({
-      where: { id },
-    });
+  async findById(
+    id: number,
+    options?: { ability?: AppAbility }
+  ): Promise<Course | null> {
+    const ability = options?.ability;
+    if (ability && !ability.can("get", "Course")) {
+      throw new UnauthorizedError();
+    }
+
+    if (!ability) {
+      return this.courseRepository.findOne({
+        where: { id },
+      });
+    }
+
+    return this.courseRepository
+      .withAbility(ability, "get")
+      .andWhere("course.id = :id", { id })
+      .getOne();
   }
 
   async findByTeacher(teacherId: number): Promise<Course[]> {

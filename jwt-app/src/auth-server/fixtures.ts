@@ -55,38 +55,38 @@ export async function loadFixtures() {
     registration: "789012",
   });
 
-  const courseService = await createCourseService();
-  const course = await courseService.create({
-    name: "Math 101",
-    code: "MATH101",
-    description: "Basic Math",
-    credits: 3,
-    semester: "Fall",
-    teacherId: 1,
-  });
+  // const courseService = await createCourseService();
+  // const course = await courseService.create({
+  //   name: "Math 101",
+  //   code: "MATH101",
+  //   description: "Basic Math",
+  //   credits: 3,
+  //   semester: "Fall",
+  //   teacherId: 1,
+  // });
 
-  const ability = defineAbilityFor(teacher1.user);
+  // const ability = defineAbilityFor(teacher1.user);
 
-  const courseFound = await courseRepository
-    .withAbility(ability, "get")
-    .andWhere("course.id = 1")
-    .getOne();
-  console.log(courseFound);
+  // const courseFound = await courseRepository
+  //   .withAbility(ability, "get")
+  //   .andWhere("course.id = 1")
+  //   .getOne();
+  // console.log(courseFound);
 
-  // const product = new Product();
-  // product.name = "Sample Product";
-  // product.price = 100.0;
-  // await productRepository.save(product);
+  const product = new Product();
+  product.name = "Sample Product";
+  product.price = 100.0;
+  await productRepository.save(product);
 
-  // const cart = new Cart();
-  // cart.userId = user.id;
-  // cart.totalPrice = 100.0;
-  // cart.totalQuantity = 1;
-  // await cartRepository.save(cart);
+  const cart = new Cart();
+  cart.userId = user.id;
+  cart.totalPrice = 100.0;
+  cart.totalQuantity = 1;
+  await cartRepository.save(cart);
 
-  // const cartProduct = new CartProduct();
-  // cartProduct.cart = cart;
-  // cartProduct.product = product;
-  // cartProduct.quantity = 1;
-  // await cartProductRepository.save(cartProduct);
+  const cartProduct = new CartProduct();
+  cartProduct.cart = cart;
+  cartProduct.product = product;
+  cartProduct.quantity = 1;
+  await cartProductRepository.save(cartProduct);
 }
