@@ -36,7 +36,10 @@ const rolePermissions: Record<Roles, DefinePermissions> = {
     } as any);
   },
   Student(user, { can }) {
-    can("get", "Course");
+    can("get", "Course", {
+      "enrollments.student.user.id": user.id,
+      "enrollments.status": "ACTIVE",
+    } as any);
   },
 };
 

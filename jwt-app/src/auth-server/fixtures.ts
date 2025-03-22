@@ -12,8 +12,12 @@ import { createTeacherService } from "./services/TeacherService";
 import { createUserService } from "./services/UserService";
 
 export async function loadFixtures() {
-  const { productRepository, cartRepository, cartProductRepository, courseRepository } =
-    await createDatabaseConnection();
+  const {
+    productRepository,
+    cartRepository,
+    cartProductRepository,
+    studentCourseRepository,
+  } = await createDatabaseConnection();
   const userService = await createUserService();
 
   const user = await userService.create({
@@ -46,7 +50,7 @@ export async function loadFixtures() {
 
   const studentService = await createStudentService();
 
-  await studentService.create({
+  const student = await studentService.create({
     user: {
       name: "Student User1",
       email: "student1@user.com",
@@ -55,23 +59,23 @@ export async function loadFixtures() {
     registration: "789012",
   });
 
-  // const courseService = await createCourseService();
-  // const course = await courseService.create({
-  //   name: "Math 101",
-  //   code: "MATH101",
-  //   description: "Basic Math",
-  //   credits: 3,
-  //   semester: "Fall",
-  //   teacherId: 1,
-  // });
+  const courseService = await createCourseService();
+  const course = await courseService.create({
+    name: "Math 101",
+    code: "MATH101",
+    description: "Basic Math",
+    credits: 3,
+    semester: "Fall",
+    teacherId: 1,
+  });
 
-  // const ability = defineAbilityFor(teacher1.user);
-
-  // const courseFound = await courseRepository
-  //   .withAbility(ability, "get")
-  //   .andWhere("course.id = 1")
-  //   .getOne();
-  // console.log(courseFound);
+  const studentCourse = await studentCourseRepository.create({
+    student,
+    course,
+    enrollmentDate: new Date(),
+    status: 'ACTIVE'
+  });
+  await studentCourseRepository.save(studentCourse);
 
   const product = new Product();
   product.name = "Sample Product";

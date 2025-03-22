@@ -91,12 +91,16 @@ Authorization: Bearer {{adminAccessToken}}
   "teacher_id": 1
 }
 
-###
+### Buscar curso do estudante
 GET http://localhost:3000/courses/1
-Authorization: Bearer {{teacher2AccessToken}}
+Authorization: Bearer {{student1AccessToken}}
 
 ###
-PATCH http://localhost:3000/courses/1
+GET http://localhost:3000/courses/2
+Authorization: Bearer {{teacher1AccessToken}}
+
+###
+PATCH http://localhost:3000/courses/2
 Content-Type: application/json
 Authorization: Bearer {{teacher1AccessToken}}
 
