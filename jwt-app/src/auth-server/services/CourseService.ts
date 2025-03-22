@@ -3,6 +3,7 @@ import { Course } from "../entities/Course";
 import { Teacher } from "../entities/Teacher";
 import { createDatabaseConnection } from "../database";
 import { NotFoundError } from "../errors";
+import { Ability } from "@casl/ability";
 
 export class CourseService {
   constructor(

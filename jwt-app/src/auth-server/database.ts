@@ -7,6 +7,7 @@ import { Teacher } from "./entities/Teacher";
 import { Student } from "./entities/Student";
 import { Course } from "./entities/Course";
 import { StudentCourse } from "./entities/StudentCourse";
+import { CourseRepository } from "./entities/CourseRepository";
 
 export let dataSource: DataSource | null = null;
 
@@ -26,6 +27,7 @@ export async function createDatabaseConnection() {
         StudentCourse,
       ],
       synchronize: true,
+      logging: true
     });
     await dataSource.initialize();
   }
@@ -37,7 +39,7 @@ export async function createDatabaseConnection() {
     cartProductRepository: dataSource.getRepository(CartProduct),
     teacherRepository: dataSource.getRepository(Teacher),
     studentRepository: dataSource.getRepository(Student),
-    courseRepository: dataSource.getRepository(Course),
+    courseRepository: new CourseRepository(Course, dataSource.createEntityManager()),
     studentCourseRepository: dataSource.getRepository(StudentCourse),
   };
 }

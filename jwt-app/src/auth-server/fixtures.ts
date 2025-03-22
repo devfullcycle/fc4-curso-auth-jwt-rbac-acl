@@ -1,14 +1,18 @@
-import { createDatabaseConnection } from "./database";
+import { createDatabaseConnection, dataSource } from "./database";
 import { Cart } from "./entities/Cart";
 import { CartProduct } from "./entities/CartProduct";
+import { Course } from "./entities/Course";
+import { CourseRepository } from "./entities/CourseRepository";
 import { Product } from "./entities/Product";
 import { Roles } from "./entities/User";
+import { defineAbilityFor } from "./permissions";
+import { createCourseService } from "./services/CourseService";
 import { createStudentService } from "./services/StudentService";
 import { createTeacherService } from "./services/TeacherService";
 import { createUserService } from "./services/UserService";
 
 export async function loadFixtures() {
-  const { productRepository, cartRepository, cartProductRepository } =
+  const { productRepository, cartRepository, cartProductRepository, courseRepository } =
     await createDatabaseConnection();
   const userService = await createUserService();
 
@@ -16,12 +20,12 @@ export async function loadFixtures() {
     name: "Admin User",
     email: "admin@user.com",
     password: "admin",
-    roles: [Roles.Admin]
+    roles: [Roles.Admin],
   });
 
   const teacherService = await createTeacherService();
 
-  await teacherService.create({
+  const teacher1 = await teacherService.create({
     user: {
       name: "Teacher User1",
       email: "teacher1@user.com",
@@ -39,9 +43,9 @@ export async function loadFixtures() {
     department: "Mathematics",
     registration: "654321",
   });
-  
+
   const studentService = await createStudentService();
-  
+
   await studentService.create({
     user: {
       name: "Student User1",
@@ -51,20 +55,38 @@ export async function loadFixtures() {
     registration: "789012",
   });
 
-  const product = new Product();
-  product.name = "Sample Product";
-  product.price = 100.0;
-  await productRepository.save(product);
+  const courseService = await createCourseService();
+  const course = await courseService.create({
+    name: "Math 101",
+    code: "MATH101",
+    description: "Basic Math",
+    credits: 3,
+    semester: "Fall",
+    teacherId: 1,
+  });
 
-  const cart = new Cart();
-  cart.userId = user.id;
-  cart.totalPrice = 100.0;
-  cart.totalQuantity = 1;
-  await cartRepository.save(cart);
+  const ability = defineAbilityFor(teacher1.user);
 
-  const cartProduct = new CartProduct();
-  cartProduct.cart = cart;
-  cartProduct.product = product;
-  cartProduct.quantity = 1;
-  await cartProductRepository.save(cartProduct);
+  const courseFound = await courseRepository
+    .withAbility(ability, "get")
+    .andWhere("course.id = 1")
+    .getOne();
+  console.log(courseFound);
+
+  // const product = new Product();
+  // product.name = "Sample Product";
+  // product.price = 100.0;
+  // await productRepository.save(product);
+
+  // const cart = new Cart();
+  // cart.userId = user.id;
+  // cart.totalPrice = 100.0;
+  // cart.totalQuantity = 1;
+  // await cartRepository.save(cart);
+
+  // const cartProduct = new CartProduct();
+  // cartProduct.cart = cart;
+  // cartProduct.product = product;
+  // cartProduct.quantity = 1;
+  // await cartProductRepository.save(cartProduct);
 }
