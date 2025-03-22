@@ -33,7 +33,6 @@ courseRouter.get("/courses/:id", async (req, res, next) => {
 // POST /courses - Cria um novo curso
 courseRouter.post(
   "/courses",
-  permissionMiddleware("create", "Course"),
   async (req, res, next) => {
     try {
       const courseService = await createCourseService();
@@ -60,14 +59,18 @@ courseRouter.patch("/courses/:id", async (req, res, next) => {
     const courseService = await createCourseService();
     const id = parseInt(req.params.id);
     const { name, code, description, credits, semester, teacherId } = req.body;
-    const course = await courseService.update(id, {
-      name,
-      code,
-      description,
-      credits,
-      semester,
-      teacherId,
-    });
+    const course = await courseService.update(
+      id,
+      {
+        name,
+        code,
+        description,
+        credits,
+        semester,
+        teacherId,
+      },
+      { ability: req.ability }
+    );
     if (!course) {
       return res.status(404).json({ message: "Curso não encontrado" });
     }

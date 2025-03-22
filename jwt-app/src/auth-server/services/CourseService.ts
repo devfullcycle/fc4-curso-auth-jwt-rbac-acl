@@ -13,14 +13,22 @@ export class CourseService {
     private teacherRepository: Repository<Teacher>
   ) {}
 
-  async create(data: {
-    name: string;
-    code: string;
-    description: string;
-    credits: number;
-    semester: string;
-    teacherId: number;
-  }): Promise<Course> {
+  async create(
+    data: {
+      name: string;
+      code: string;
+      description: string;
+      credits: number;
+      semester: string;
+      teacherId: number;
+    },
+    options?: { ability?: AppAbility }
+  ): Promise<Course> {
+    const ability = options?.ability;
+    if (ability && !ability.can("create", "Course")) {
+      throw new UnauthorizedError();
+    }
+    
     const teacher = await this.teacherRepository.findOneBy({
       id: data.teacherId,
     });
@@ -90,9 +98,21 @@ export class CourseService {
       credits?: number;
       semester?: string;
       teacherId?: number;
-    }
+    },
+    options?: { ability?: AppAbility }
   ): Promise<Course | null> {
-    const course = await this.findById(id);
+    const ability = options?.ability;
+    if (ability && !ability.can("update", "Course")) {
+      throw new UnauthorizedError();
+    }
+
+    const course = ability
+      ? await this.courseRepository
+          .withAbility(ability, "update")
+          .andWhere("course.id = :id", { id })
+          .getOne()
+      : await this.findById(id);
+
     if (!course) {
       throw new NotFoundError({ message: "Course not found" });
     }
