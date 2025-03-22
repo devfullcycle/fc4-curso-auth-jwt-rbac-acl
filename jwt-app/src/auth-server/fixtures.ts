@@ -17,6 +17,7 @@ export async function loadFixtures() {
     cartRepository,
     cartProductRepository,
     studentCourseRepository,
+    userRepository
   } = await createDatabaseConnection();
   const userService = await createUserService();
 
@@ -38,7 +39,7 @@ export async function loadFixtures() {
     department: "Computer Science",
     registration: "123456",
   });
-  await teacherService.create({
+  const teacher2 = await teacherService.create({
     user: {
       name: "Teacher User2",
       email: "teacher2@user.com",
@@ -47,6 +48,20 @@ export async function loadFixtures() {
     department: "Mathematics",
     registration: "654321",
   });
+  teacher2.user.permissions = [
+    {
+      resource: "Course",
+      action: "update",
+      attributes: ["description"],
+      condition: { id: 1 },
+    },
+    {
+      resource: "Course",
+      action: "get",
+      condition: { id: 1 },
+    },
+  ];
+  await userRepository.save(teacher2.user);
 
   const studentService = await createStudentService();
 
@@ -73,7 +88,7 @@ export async function loadFixtures() {
     student,
     course,
     enrollmentDate: new Date(),
-    status: 'ACTIVE'
+    status: "ACTIVE",
   });
   await studentCourseRepository.save(studentCourse);
 

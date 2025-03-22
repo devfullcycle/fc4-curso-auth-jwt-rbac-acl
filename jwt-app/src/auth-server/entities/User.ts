@@ -13,6 +13,13 @@ export enum Roles {
   Student = "Student"
 }
 
+export type Permission = {
+  resource: string; //Course
+  action: string; //get, update
+  condition?: { [key: string]: any }; //{"teacher.user.id": user.id}
+  attributes?: string[]; //["description"]
+};
+
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
@@ -30,8 +37,11 @@ export class User {
   @Column("simple-array")
   roles: Roles[];
 
+  @Column("json", {nullable: true})
+  permissions: Permission[] | null;
+
   @BeforeInsert()
-  @BeforeUpdate()
+  //@BeforeUpdate()
   async hashPassword() {
     // Only hash the password if it has been modified
     if (this.password) {

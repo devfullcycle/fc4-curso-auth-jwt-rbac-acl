@@ -24,6 +24,7 @@ type DefinePermissions = (
   user: User,
   builder: AbilityBuilder<AppAbility>
 ) => void;
+//acl - recurso (pasta, arquivo) - 
 
 const rolePermissions: Record<Roles, DefinePermissions> = {
   Admin(user, { can }) {
@@ -47,6 +48,10 @@ export function defineAbilityFor(user: User): AppAbility {
   const builder = new AbilityBuilder(
     createMongoAbility as CreateAbility<AppAbility>
   );
+
+  user.permissions?.forEach(({ resource, action, condition, attributes }) => {
+    builder.can(action as any, resource as any, attributes, condition);
+  });
 
   user.roles.forEach((role) => {
     const permissions = rolePermissions[role];
