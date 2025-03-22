@@ -6,6 +6,7 @@ import { NotFoundError, UnauthorizedError } from "../errors";
 import { Ability } from "@casl/ability";
 import { AppAbility } from "../permissions";
 import { CourseRepository } from "../entities/CourseRepository";
+import { permittedFieldsOf } from "@casl/ability/extra";
 
 export class CourseService {
   constructor(
@@ -28,7 +29,7 @@ export class CourseService {
     if (ability && !ability.can("create", "Course")) {
       throw new UnauthorizedError();
     }
-    
+
     const teacher = await this.teacherRepository.findOneBy({
       id: data.teacherId,
     });
@@ -101,6 +102,10 @@ export class CourseService {
     },
     options?: { ability?: AppAbility }
   ): Promise<Course | null> {
+    const fieldsForUpdate = Object.keys(data).filter(
+      (key) => data[key as keyof typeof data] !== undefined
+    );
+
     const ability = options?.ability;
     if (ability && !ability.can("update", "Course")) {
       throw new UnauthorizedError();
@@ -115,6 +120,10 @@ export class CourseService {
 
     if (!course) {
       throw new NotFoundError({ message: "Course not found" });
+    }
+
+    if(ability && !this.isFieldsAllowed(ability, "update", course, fieldsForUpdate)) {
+      throw new UnauthorizedError();
     }
 
     if (data.teacherId) {
@@ -136,6 +145,28 @@ export class CourseService {
     });
 
     return this.courseRepository.save(course);
+  }
+
+  isFieldsAllowed(
+    ability: AppAbility,
+    action: string,
+    resource: any,
+    requestedFields: string[]
+  ): boolean {
+    const fieldsPermitted = permittedFieldsOf(
+      ability,
+      action as any,
+      resource,
+      {
+        fieldsFrom: (rule) => rule.fields || [],
+      }
+    );
+    console.log(fieldsPermitted);
+    return (
+      !requestedFields ||
+      fieldsPermitted.length === 0 ||
+      requestedFields.every((field) => fieldsPermitted.includes(field))
+    );
   }
 
   async delete(id: number): Promise<void> {

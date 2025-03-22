@@ -30,8 +30,10 @@ const rolePermissions: Record<Roles, DefinePermissions> = {
     can("manage", "all"); // admin can manage everything
   },
   Teacher(user, { can }) {
-    can("get", "Course", { "teacher.user.id": user.id, } as any);
-    can("update", "Course",{ "teacher.user.id": user.id } as any);
+    can("get", "Course", { "teacher.user.id": user.id } as any);
+    can("update", "Course", ["description"], {
+      "teacher.user.id": user.id,
+    } as any);
   },
   Student(user, { can }) {
     can("get", "Course");
