@@ -21,7 +21,7 @@ import cookieParser from "cookie-parser";
 import { courseRouter } from "./router/course-router";
 import { teacherRouter } from "./router/teacher-router";
 import { studentRouter } from "./router/student-router";
-import { defineAbilityFor } from "./permissions";
+import { defineAbilityFor, defineAbilityFrom } from "./permissions";
 
 dotenv.config();
 
@@ -61,7 +61,8 @@ app.use(async (req, res, next) => {
     const userService = await createUserService();
     const user = await userService.findById(+payload.sub);
     req.user = user!;
-    req.ability = defineAbilityFor(user!);
+    //req.ability = defineAbilityFor(user!); //cache lru
+    req.ability = defineAbilityFrom(payload.permissions); //banco de dados
     next();
   } catch (e) {
     if (e instanceof jwt.TokenExpiredError) {

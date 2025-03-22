@@ -27,7 +27,7 @@ export async function createDatabaseConnection() {
         StudentCourse,
       ],
       synchronize: true,
-      logging: true
+      //logging: true
     });
     await dataSource.initialize();
   }

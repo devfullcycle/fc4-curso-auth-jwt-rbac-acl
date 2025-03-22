@@ -6,6 +6,7 @@ import {
   MongoAbility,
 } from "@casl/ability";
 import { Roles, User } from "./entities/User";
+import { unpackRules } from "@casl/ability/extra";
 
 const actions = ["manage", "create", "update", "delete", "get"] as const;
 const resources = ["User", "Course", "all"] as const;
@@ -63,4 +64,16 @@ export function defineAbilityFor(user: User): AppAbility {
   });
 
   return builder.build();
+}
+
+export function defineAbilityFrom(rules: any[]): AppAbility {
+  const builder = new AbilityBuilder(
+    createMongoAbility as CreateAbility<AppAbility>
+  );
+
+  const convertedRules = unpackRules(rules);
+
+  const ability = builder.build();
+  ability.update(convertedRules as any);
+  return ability;
 }

@@ -96,13 +96,13 @@ GET http://localhost:3000/courses/1
 Authorization: Bearer {{student1AccessToken}}
 
 ###
-GET http://localhost:3000/courses/2
+GET http://localhost:3000/courses/1
 Authorization: Bearer {{teacher2AccessToken}}
 
 ###
-PATCH http://localhost:3000/courses/1
+PATCH http://localhost:3000/courses/2
 Content-Type: application/json
-Authorization: Bearer {{teacher2AccessToken}}
+Authorization: Bearer {{teacher1AccessToken}}
 
 {
   "description": "Updated NodeJS course description"

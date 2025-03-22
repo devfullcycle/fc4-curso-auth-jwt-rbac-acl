@@ -31,27 +31,26 @@ courseRouter.get("/courses/:id", async (req, res, next) => {
 });
 
 // POST /courses - Cria um novo curso
-courseRouter.post(
-  "/courses",
-  async (req, res, next) => {
-    try {
-      const courseService = await createCourseService();
-      const { name, code, description, credits, semester, teacherId } =
-        req.body;
-      const course = await courseService.create({
+courseRouter.post("/courses", async (req, res, next) => {
+  try {
+    const courseService = await createCourseService();
+    const { name, code, description, credits, semester, teacherId } = req.body;
+    const course = await courseService.create(
+      {
         name,
         code,
         description,
         credits,
         semester,
         teacherId,
-      });
-      return res.status(201).json(course);
-    } catch (error) {
-      next(error);
-    }
+      },
+      { ability: req.ability }
+    );
+    return res.status(201).json(course);
+  } catch (error) {
+    next(error);
   }
-);
+});
 
 // PUT /courses/:id - Atualiza um curso existente
 courseRouter.patch("/courses/:id", async (req, res, next) => {

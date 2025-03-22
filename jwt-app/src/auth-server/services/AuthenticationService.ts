@@ -7,6 +7,8 @@ import {
   NotFoundError,
 } from "../errors";
 import { createDatabaseConnection } from "../database";
+import { defineAbilityFor } from "../permissions";
+import { packRules } from "@casl/ability/extra";
 
 export class AuthenticationService {
   constructor(private userRepository: Repository<User>) {}
@@ -19,7 +21,9 @@ export class AuthenticationService {
     if (!user || !user.comparePassword(password)) {
       throw new InvalidCredentialsError();
     }
-    const accessToken = AuthenticationService.generateAccessToken(user);
+    const ability = defineAbilityFor(user);
+    const permissions = packRules(ability.rules);
+    const accessToken = AuthenticationService.generateAccessToken(user, permissions);
     const refreshToken = AuthenticationService.generateRefreshToken(user);
     return {
       access_token: accessToken,
@@ -27,14 +31,14 @@ export class AuthenticationService {
     };
   }
 
-  static generateAccessToken(user: User): string {
+  static generateAccessToken(user: User, permissions: any): string {
     return jwt.sign(
-      { name: user.name, email: user.email, roles: user.roles },
+      { name: user.name, email: user.email, roles: user.roles, permissions },
       process.env.JWT_PRIVATE_KEY as string,
       {
         expiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRES_IN as any,
         subject: user.id + "",
-        algorithm: 'RS256'
+        algorithm: "RS256",
       }
     );
   }
@@ -44,6 +48,7 @@ export class AuthenticationService {
     name: string;
     email: string;
     roles: string[];
+    permissions: any[];
     iat: number;
     exp: number;
   } {
@@ -54,6 +59,7 @@ export class AuthenticationService {
       name: string;
       email: string;
       roles: string[];
+      permissions: any[];
       iat: number;
       exp: number;
     };
@@ -66,7 +72,7 @@ export class AuthenticationService {
       {
         expiresIn: process.env.JWT_REFRESH_TOKEN_EXPIRES_IN as any,
         subject: user.id + "",
-        algorithm: 'RS256'
+        algorithm: "RS256",
       }
     );
   }
@@ -100,7 +106,9 @@ export class AuthenticationService {
       if (!user) {
         throw new NotFoundError({ message: "User not found" });
       }
-      const newAccessToken = AuthenticationService.generateAccessToken(user!);
+      const ability = defineAbilityFor(user);
+      const permissions = packRules(ability.rules);
+      const newAccessToken = AuthenticationService.generateAccessToken(user!, permissions);
       const newRefreshToken = AuthenticationService.generateRefreshToken(user!);
       return {
         access_token: newAccessToken,
