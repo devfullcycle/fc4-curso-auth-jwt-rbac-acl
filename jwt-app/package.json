@@ -22,6 +22,7 @@
     "express-session": "^1.18.1",
     "iron-session": "^8.0.4",
     "jsonwebtoken": "^9.0.2",
+    "node-cache": "^5.1.2",
     "sqlite3": "^5.1.7",
     "typeorm": "^0.3.20"
   },

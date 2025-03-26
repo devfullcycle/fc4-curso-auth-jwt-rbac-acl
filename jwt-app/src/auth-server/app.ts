@@ -2,11 +2,12 @@ import express, { NextFunction } from "express";
 import { loadFixtures } from "./fixtures";
 import { logRequest, logResponse } from "../lib/log";
 import { userRouter } from "./router/user-router";
-import { AuthenticationService } from "./services/AuthenticationService";
+import { AuthenticationService, createAuthenticationService } from "./services/AuthenticationService";
 import dotenv from "dotenv";
 import {
   InvalidAccessTokenError,
   InvalidCredentialsError,
+  InvalidRefreshTokenError,
   NotFoundError,
   TokenExpiredError,
   TokenNotProvidedError,
@@ -118,6 +119,15 @@ app.use(async (req, res, next) => {
   }
 
   try {
+    const authService = await createAuthenticationService();
+    // Verificar se o token está na blocklist
+    const isBlocked = await authService.isTokenBlocked(accessToken);
+    if (isBlocked) {
+      return next(
+        new InvalidAccessTokenError({ message: "Token is blacklisted" })
+      );
+    }
+
     const payload = AuthenticationService.verifyAccessToken(accessToken);
     const userService = await createUserService();
     const user = await userService.findById(+payload.sub);
@@ -235,6 +245,11 @@ function errorHandler(
 
   if (error instanceof InvalidAccessTokenError) {
     res.status(401).send({ message: "Invalid access token" });
+    return;
+  }
+
+  if(error instanceof InvalidRefreshTokenError){
+    res.status(401).send({message: "Invalid refresh token"});
     return;
   }
 

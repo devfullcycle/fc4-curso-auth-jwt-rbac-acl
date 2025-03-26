@@ -13,6 +13,26 @@ Content-Type: application/json
 @adminAccessToken = {{ admin_jwt_action.response.body.access_token }}
 @adminRefreshToken = {{ admin_jwt_action.response.body.refresh_token }}
 
+### Logout
+
+POST http://localhost:3000/logout
+Content-Type: application/json
+
+{
+  "accessToken": "{{adminAccessToken}}",
+  "refreshToken": "{{adminRefreshToken}}"
+}
+
+###
+
+POST http://localhost:3000/refresh-token
+Authorization: Bearer {{ adminRefreshToken }}
+
+###
+
+GET http://localhost:3000/protected
+Authorization: Bearer {{ adminAccessToken }}
+
 ###
 
 POST http://localhost:3000/csrf-token

@@ -43,10 +43,33 @@ authRouter.post("/refresh-token", async (req, res, next) => {
   }
 });
 
-authRouter.post('/logout', (req, res) => {
-  res.clearCookie('accessToken');
-  res.clearCookie('refreshToken');
-  res.status(204).end();
+authRouter.post('/logout', async (req, res) => {
+  try {
+    // Identificar o access token
+    const accessToken =
+      req.body?.accessToken ||
+      req.cookies?.accessToken;
+    
+    // Identificar o refresh token
+    const refreshToken =
+      req.body?.refreshToken ||
+      req.cookies?.refreshToken;
+    
+    // Usar o AuthenticationService para logout
+    const authService = await createAuthenticationService();
+    await authService.logout(accessToken, refreshToken);
+    
+    // Limpa os cookies
+    res.clearCookie("accessToken");
+    res.clearCookie("refreshToken");
+    res.status(204).send();
+  } catch (error) {
+    console.error(error);
+    // Em caso de erro, ainda limpa os cookies e retorna sucesso
+    res.clearCookie("accessToken");
+    res.clearCookie("refreshToken");
+    res.status(204).send();
+  }
 })
 
 export function generateAccessTokenCookie(res: Response, accessToken: string){
