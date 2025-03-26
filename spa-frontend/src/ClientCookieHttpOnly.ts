@@ -51,20 +51,7 @@ export type TokenResponse = {
     }
   
     async login(email: string, password: string): Promise<TokenResponse> {
-      const response = await fetch(`${this.baseURL}/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-        credentials: 'include',
-      })
-  
-      if (!response.ok) {
-        throw new Error('Login failed')
-      }
-  
-      const data = await response.json()
+      const data = await this.post<TokenResponse>('/login', { email, password }, {}, false)
   
       this.updateAccessTokenExpiry(data.access_token)
       this.updateRefreshTokenExpiry(data.refresh_token)
@@ -82,19 +69,7 @@ export type TokenResponse = {
     }
   
     async doRefreshToken(): Promise<TokenResponse> {
-      const response = await fetch(`${this.baseURL}/refresh-token`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-      })
-  
-      if (!response.ok) {
-        throw new Error('Failed to refresh token')
-      }
-  
-      const data = await response.json()
+      const data = await this.post<TokenResponse>('/refresh-token', {}, {}, false)
       this.updateAccessTokenExpiry(data.access_token)
       this.updateRefreshTokenExpiry(data.refresh_token)
   
@@ -107,9 +82,11 @@ export type TokenResponse = {
           await this.doRefreshToken()
         }
       }
+
+      const newConfig = this.applyCsrfToken(config)
   
       const response = await fetch(`${this.baseURL}${path}`, {
-        ...config,
+        ...newConfig,
         credentials: 'include',
       })
   
@@ -153,6 +130,21 @@ export type TokenResponse = {
         body: JSON.stringify(data),
       }
       return this.makeRequest(path, conf, requiresAuth)
+    }
+
+    applyCsrfToken(config: RequestInit): RequestInit {
+      const isInsecureMethod = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(config.method?.toUpperCase() || '')
+      const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+      if (isInsecureMethod && csrfToken) {
+        return {
+          ...config,
+          headers: {
+            ...config.headers,
+            'X-CSRF-Token': decodeURIComponent(csrfToken), 
+          },
+        }
+      }
+      return config
     }
   }
   

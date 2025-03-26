@@ -21,22 +21,83 @@ import cookieParser from "cookie-parser";
 import { courseRouter } from "./router/course-router";
 import { teacherRouter } from "./router/teacher-router";
 import { studentRouter } from "./router/student-router";
-import { defineAbilityFor, defineAbilityFrom } from "./permissions";
+import { defineAbilityFrom } from "./permissions";
+import csrf from "csrf";
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+const csrfTokens = new csrf();
+const secret = csrfTokens.secretSync();
+const allowedOrigins = ["http://localhost:5173", "http://localhost:9000"];
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors({credentials: true, origin: 'http://localhost:5173'}));
+app.use(cors({credentials: true, origin: allowedOrigins}));
 //log requests
 app.use(logRequest);
 //log responses headers
 app.use(logResponse);
 
 const protectedRoutes = ["/protected", "/users", '/teachers', '/students', '/courses'];
+
+app.use((req, res, next) => {
+  //https://my-spa.com/pagina1
+    //Origin: https://my-spa.com
+    //Referer: https://my-spa.com/pagina1/
+  const origin = req.headers.origin; //origin e referer
+  const referer = req.headers.referer?.replace(/\/$/, "");
+  if (origin && !allowedOrigins.includes(origin)) {
+    return res.status(403).send({ message: "Invalid Origin" });
+  }
+  
+  if (referer && !allowedOrigins.some((allowedOrigin) => referer.startsWith(allowedOrigin))) {
+    return res.status(403).send({ message: "Invalid Referer" });
+  }
+
+  if (req.url === "/csrf-token") { //não precisa de token CSRF
+    return next();
+  }
+  //anti csrf attack
+  const insecureMethods = ["POST", "PUT", "PATCH", "DELETE"]; //não seguros
+  if (!insecureMethods.includes(req.method)) {
+    return next();
+  }
+  // Verifica se o token CSRF é válido
+  const accessToken = req.cookies?.accessToken;
+  const refreshToken = req.cookies?.refreshToken;
+  const csrfTokenCookie = req.cookies?.["csrf-token"];
+  const csrfTokenHeader = req.headers?.["x-csrf-token"];
+  console.log("CSRF Token Header:", csrfTokenHeader);
+  console.log("CSRF Token Cookie:", csrfTokenCookie);
+  if (csrfTokenCookie && !csrfTokenHeader) {
+    return res.status(403).send({ message: "CSRF token missing" });
+  }
+  if ((accessToken || refreshToken) && !csrfTokenHeader && !csrfTokenCookie) {
+    return res.status(403).send({ message: "CSRF token missing" });
+  }
+  if (
+    csrfTokenCookie &&
+    csrfTokenCookie !== csrfTokenHeader &&
+    csrfTokens.verify(secret, csrfTokenCookie)
+  ) {
+    return res.status(403).send({ message: "Invalid CSRF token" });
+  }
+
+  next();
+  // Gera um novo token CSRF
+  // const newCsrfToken = Math.random().toString(36).slice(2);
+  // res.setHeader('X-CSRF-Token', newCsrfToken);
+  // res.cookie("csrfSecret", newCsrfToken, {
+  //   httpOnly: false,
+  //   secure: true,
+  //   sameSite: "none",
+  //   signed: true,
+  // });
+
+
+});
 
 app.use(async (req, res, next) => {
   const isProtectedRoute = protectedRoutes.some((route) =>
@@ -100,8 +161,23 @@ app.use(
   }
 );
 
-app.get("/protected", (req, res) => {
+app.get("/protected", (req, res) => { //segura GET 
   res.status(200).json(req.user);
+});
+app.post("/protected", (req, res) => { //não segura POST
+  res.status(200).json({message: 'Protected route'});
+});
+
+app.post("/csrf-token", (req, res) => {
+
+  const token = csrfTokens.create(secret);
+  console.log("CSRF Token:", token);
+  res.cookie("csrf-token", token, {
+    httpOnly: false, //https document.cookie = ''
+    secure: true,
+    sameSite: "none",
+  });
+  res.send({ csrfToken: token });
 });
 
 // Rotas da API

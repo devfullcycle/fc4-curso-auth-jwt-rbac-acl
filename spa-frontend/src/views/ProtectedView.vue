@@ -20,6 +20,8 @@ const http = new ClientCookieHttpOnly({
 //   })
 const user = ref({});
 http.get('/protected').then((data) => user.value = data)
+
+http.post('/protected').then((data) => {})
 </script>
 
 <template>

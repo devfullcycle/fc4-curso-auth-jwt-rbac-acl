@@ -27,6 +27,26 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
+  const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+
+
+  const accessTokenExpiryTime = parseInt(localStorage.getItem('accessTokenExpiryTime')!)
+  const refreshTokenExpiryTime = parseInt(localStorage.getItem('refreshTokenExpiryTime')!)
+
+  const http = new ClientCookieHttpOnly({
+    baseURL: 'http://localhost:3000',
+    accessTokenExpiryTime,
+    refreshTokenExpiryTime,
+  });
+
+  if(!csrfToken){
+    const data = await http.post('/csrf-token', {}, {}, false);
+    const meta = document.createElement('meta');
+    meta.name = 'csrf-token';
+    meta.content = data.csrfToken;
+    document.head.appendChild(meta);
+  }
+  
   if (to.name === 'login') {
     next()
     return
@@ -37,19 +57,10 @@ router.beforeEach(async (to, from, next) => {
     return
   }
 
-  const accessTokenExpiryTime = parseInt(localStorage.getItem('accessTokenExpiryTime')!)
-  const refreshTokenExpiryTime = parseInt(localStorage.getItem('refreshTokenExpiryTime')!)
-
   if (!accessTokenExpiryTime || !refreshTokenExpiryTime) {
     next({ name: 'logout' })
     return
   }
-
-  const http = new ClientCookieHttpOnly({
-    baseURL: 'http://localhost:3000',
-    accessTokenExpiryTime,
-    refreshTokenExpiryTime,
-  });
 
   if(http.isAccessTokenExpiring()){
     try{

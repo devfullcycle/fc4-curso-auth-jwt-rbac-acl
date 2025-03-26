@@ -55,7 +55,7 @@ export function generateAccessTokenCookie(res: Response, accessToken: string){
     //secure: process.env.NODE_ENV === 'production',
     secure: true,
     sameSite: 'none',
-    maxAge: 60000,
+    maxAge: 6000000, 
     path: '/'
   })
 }

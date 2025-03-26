@@ -2,7 +2,6 @@
 # @name admin_jwt_action
 POST http://localhost:3000/login
 Content-Type: application/json
-Origin: http://localhost:3000
 
 {
   "email": "admin@user.com",
@@ -13,6 +12,20 @@ Origin: http://localhost:3000
 
 @adminAccessToken = {{ admin_jwt_action.response.body.access_token }}
 @adminRefreshToken = {{ admin_jwt_action.response.body.refresh_token }}
+
+###
+
+POST http://localhost:3000/csrf-token
+
+
+
+
+### singed double submit cookie
+POST http://localhost:3000/protected
+Cookie: accessToken={{ adminAccessToken }};csrf-token=V9uw74vS-WP2iHTQBFuV8qba23QkQkcx5VQE
+X-CSRF-TOKEN: V9uw74vS-WP2iHTQBFuV8qba23QkQkcx5VQE
+
+#programacao - valor do csrf token - header x-csrf-token
 
 ### 👉👉👉 TEACHER1 LOGIN 👈👈👈
 # @name teacher1_jwt_action
